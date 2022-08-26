@@ -1,3 +1,9 @@
 venv
 *.csv
 .env
+pycache/
+*/pycache/
+migrations/versions/*.py
+*.py[cod]
+.pyc
+*.pyc
