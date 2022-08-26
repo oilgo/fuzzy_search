@@ -1,9 +1,8 @@
 venv
-*.csv
 .env
-pycache/
-*/pycache/
+*.csv
 migrations/versions/*.py
 *.py[cod]
 .pyc
 *.pyc
+__pycache__/*
