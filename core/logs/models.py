@@ -10,7 +10,7 @@ class ErrorLogs(Base):
     error_code = Column(Integer)
     error_description = Column(String(500))
     user_ip = Column(String(15))
-    error_date = Column(DateTime, server_default=func.now())
+    error_date = Column(DateTime(timezone=True), server_default=func.now())
     error_source = Column(String(100))
 
 
