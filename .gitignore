@@ -1,7 +1,6 @@
 venv
 .env
 *.csv
-migrations/versions/*.py
 *.py[cod]
 .pyc
 *.pyc

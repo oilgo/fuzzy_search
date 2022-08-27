@@ -1,16 +1,30 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
-from apps.routes import router as API
-from core.database import database
+from apps.routes import router as api
+from core.database import database, metadata, engine
+
 
 app = FastAPI()
 
-app.include_router(API)
+metadata.create_all(
+    bind = engine)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],)
+
+app.include_router(
+    router = api)
 
 
 @app.get("/")
-async def read_root():
-    return RedirectResponse(url='/docs/')
+async def main():
+    return RedirectResponse(
+        url = "/docs/")
 
 
 @app.on_event("startup")
@@ -21,4 +35,3 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
-
