@@ -2,7 +2,6 @@ from core.database import Base
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 
-
 class ErrorLogs(Base):
     """ Logs of services errors model
     """
@@ -31,8 +30,8 @@ class ErrorLogs(Base):
         server_default = "127.0.0.1")
 
     error_date = Column(
-        DateTime(timezone = True), 
-        server_default = func.now())
+        DateTime(timezone=True), 
+        default=func.now())
 
     error_source = Column(
         String(100),

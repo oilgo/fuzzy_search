@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from .services import get_similar_values
+from .services import decider
 from .schemas import SearchRequest
 
 
@@ -17,7 +17,9 @@ async def get_values(
     """ Endpoint to return similar values
     """
 
-    response = await get_similar_values(
+    response = await decider(
         value = request)
 
     return response
+
+

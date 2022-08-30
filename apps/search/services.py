@@ -1,3 +1,4 @@
+from doctest import DocFileCase
 import os
 import pandas as pd
 import numpy as np
@@ -5,45 +6,36 @@ from fastapi import HTTPException, status
 from difflib import SequenceMatcher
 from core.logs.schemas import ErrorRequest
 from .schemas import SearchRequest
+from core.database import engine
 
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-async def get_similar_values(
+async def decider(
     value: SearchRequest
+):
+    if value.type == 'csv':
+        df = await read_from_csv(value.name)
+    elif value.type == 'database':
+        df = await read_from_db(value.name)
+    else:
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = 'Invalid format')
+    return await get_similar_values(value, df)
+
+
+async def get_similar_values(
+    value: SearchRequest, df: pd.DataFrame
 ):
     """ Method to return similar values
     """
-
-    try:
-
-        df = pd.read_csv(
-            filepath_or_buffer = f"./apps/database/{ value.file_name }")
-
-    except Exception as e:
-
-        detail = f"{value.file_name} not found."
-
-        error = ErrorRequest(
-            error_code = 404, 
-            error_description = detail, 
-            user_ip = "127.0.0.1", 
-            error_source = os.getcwd() + '\\' + os.path.basename(__file__))
-
-        await error.write_log_errors()
-
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND, 
-            detail = detail)
-
     models = list(df.ModelName)
     length = len(models)
 
     if length == 0:
 
-        detail = f"No data found in { value.file_name }"
+        detail = f"No data found in { value.name }"
 
         error = ErrorRequest(
             error_code = 404, 
@@ -88,3 +80,49 @@ async def get_similar_values(
     return {
         "similar_values": output.to_dict()["new_model"]
     }
+
+
+async def read_from_db(
+    value: str
+):
+    try:
+
+        df = pd.read_sql_query(f'select em.\"ModelName\" from public.\"{value}\" em', con=engine)
+        return df
+
+    except Exception as e:
+        print(e)
+        await no_file(value)
+
+
+async def read_from_csv(
+    value: str
+):
+    try:
+
+        df = pd.read_csv(
+            filepath_or_buffer = f"./apps/database/{value}.csv")
+        return df
+
+    except Exception as e:
+        await no_file(value)
+    
+
+
+async def no_file(
+    value: str
+    ):
+    
+    detail = f"{value} not found."
+
+    error = ErrorRequest(
+        error_code = 404, 
+        error_description = detail, 
+        user_ip = "127.0.0.1", 
+        error_source = os.getcwd() + '\\' + os.path.basename(__file__))
+
+    await error.write_log_errors()
+
+    raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND, 
+        detail = detail)
