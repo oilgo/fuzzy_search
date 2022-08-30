@@ -1,11 +1,11 @@
 from fastapi import APIRouter, status
-from .services import decider
+from .services import _get_values
 from .schemas import SearchRequest
 
 
 router = APIRouter(
     prefix = "/search", 
-    tags = ["fuzzy search"])
+    tags = ["Fuzzy search"])
 
 
 @router.post(
@@ -17,9 +17,7 @@ async def get_values(
     """ Endpoint to return similar values
     """
 
-    response = await decider(
+    response = await _get_values(
         value = request)
 
     return response
-
-

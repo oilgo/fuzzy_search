@@ -11,16 +11,16 @@ class SearchRequest(BaseModel):
     limit: Optional[int] = 10
     round: Optional[int] = 2
     percent: Optional[float] = 50
-    type: str
+    type: Optional[str] = "database"
 
     class Config:
         schema_extra = {
             "example": {
-                "name": 'EquipmentModel',
-                "new_model": 'СКАТ-2400',
+                "name": "EquipmentModel",
+                "new_model": "СКАТ-2400",
                 "limit": 10,
                 "round": 2,
                 "percent": 50,
-                "type": 'database'
+                "type": "database"
             }
         }

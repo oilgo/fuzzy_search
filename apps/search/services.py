@@ -1,4 +1,3 @@
-from doctest import DocFileCase
 import os
 import pandas as pd
 import numpy as np
@@ -13,23 +12,36 @@ def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-async def decider(
+async def _get_values(
     value: SearchRequest
 ):
-    if value.type == 'csv':
-        df = await read_from_csv(value.name)
-    elif value.type == 'database':
-        df = await read_from_db(value.name)
+    if value.type == "csv":
+
+        df = await read_from_csv(
+            value = value.name)
+
+    elif value.type == "database":
+
+        df = await read_from_db(
+            value = value.name)
     else:
-        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = 'Invalid format')
-    return await get_similar_values(value, df)
+
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST, 
+            detail = "Invalid format.")
+
+    return await get_similar_values(
+        value = value, 
+        df = df)
 
 
 async def get_similar_values(
-    value: SearchRequest, df: pd.DataFrame
+    value: SearchRequest, 
+    df: pd.DataFrame
 ):
     """ Method to return similar values
     """
+
     models = list(df.ModelName)
     length = len(models)
 
@@ -87,12 +99,16 @@ async def read_from_db(
 ):
     try:
 
-        df = pd.read_sql_query(f'select em.\"ModelName\" from public.\"{value}\" em', con=engine)
+        df = pd.read_sql_query(
+            sql = f"SELECT \"ModelName\" from public.\"{ value }\";", 
+            con = engine)
+
         return df
 
-    except Exception as e:
-        print(e)
-        await no_file(value)
+    except:
+
+        await no_file(
+            value = value)
 
 
 async def read_from_csv(
@@ -101,19 +117,20 @@ async def read_from_csv(
     try:
 
         df = pd.read_csv(
-            filepath_or_buffer = f"./apps/database/{value}.csv")
+            filepath_or_buffer = f"./apps/database/{ value }.csv")
         return df
 
-    except Exception as e:
-        await no_file(value)
-    
+    except:
 
+        await no_file(
+            value = value)
+    
 
 async def no_file(
     value: str
-    ):
+):
     
-    detail = f"{value} not found."
+    detail = f"{ value } not found."
 
     error = ErrorRequest(
         error_code = 404, 
